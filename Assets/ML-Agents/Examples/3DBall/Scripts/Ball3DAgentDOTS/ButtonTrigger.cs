@@ -1,4 +1,5 @@
 using System;
+using Unity.MLAgents;
 using UnityEngine;
 
 namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
@@ -11,6 +12,11 @@ namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
         public void Start()
         {
             EnablePhysics = true;
+        }
+
+        public void Update()
+        {
+            Debug.Log($"{Academy.IsInitialized}");
         }
 
         void OnGUI()
