@@ -22,7 +22,7 @@ namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
         {
             base.OnCreate();
             RequireForUpdate<InitTag>();
-            m_Academy = Academy.Instance;
+            RequireForUpdate<Ball3D>();
         }
 
         protected override void OnUpdate()

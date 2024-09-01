@@ -9,6 +9,8 @@ namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
         public Entity cube;
     }
 
+    public struct Ball3D : IComponentData{}
+
     public struct InitTag : IComponentData{}
     public class Config : MonoBehaviour
     {
@@ -23,6 +25,7 @@ namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
                 com.ball = GetEntity(authoring.ball, TransformUsageFlags.Dynamic);
                 com.cube = GetEntity(authoring.cube, TransformUsageFlags.Dynamic);
                 AddComponent(e, com);
+                AddComponent(e, new Ball3D());
             }
         }
     }

@@ -10,6 +10,7 @@ namespace ML_Agents.Examples._3DBall.Scripts.Ball3DAgentDOTS
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<Ball3D>();
             state.RequireForUpdate<ConfigComponent>();
         }
 

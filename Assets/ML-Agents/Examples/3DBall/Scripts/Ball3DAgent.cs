@@ -23,6 +23,7 @@ public class Ball3DAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        Debug.Log($"Step{StepCount} - Observation");
         if (useVecObs)
         {
             sensor.AddObservation(gameObject.transform.rotation.z);
@@ -35,7 +36,7 @@ public class Ball3DAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        Debug.Log("OnActionReceived");
+        Debug.Log($"Step{StepCount} - Action");
         var actionZ = 2f * Mathf.Clamp(actionBuffers.ContinuousActions[0], -1f, 1f);
         var actionX = 2f * Mathf.Clamp(actionBuffers.ContinuousActions[1], -1f, 1f);
 
@@ -65,6 +66,7 @@ public class Ball3DAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log($"Step{StepCount} - Episode Begin");
         gameObject.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
         gameObject.transform.Rotate(new Vector3(1, 0, 0), Random.Range(-10f, 10f));
         gameObject.transform.Rotate(new Vector3(0, 0, 1), Random.Range(-10f, 10f));
