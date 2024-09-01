@@ -16,10 +16,12 @@ namespace ML_Agents.Examples.GridWorld.Scripts.GridWorld
     [UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
     public partial struct GridMotionSystem : ISystem
     {
+        Random m_Random;
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<AreaData>();
+            m_Random = new Random(1);
         }
 
         public void OnUpdate(ref SystemState state)
@@ -90,11 +92,10 @@ namespace ML_Agents.Examples.GridWorld.Scripts.GridWorld
             #region set positions
 
             NativeHashSet<int2> positions = new NativeHashSet<int2>(3, Allocator.Temp);
-            var seed = (uint)Mathf.Max(1f,(float)SystemAPI.Time.ElapsedTime);
-            Random random = new Random(seed);
+
             while (positions.Count < 3)
             {
-                int2 pos = random.NextInt2(-2, 3);
+                int2 pos = m_Random.NextInt2(-2, 3);
                 positions.Add(pos);
             }
 
