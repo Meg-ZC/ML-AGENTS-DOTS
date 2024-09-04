@@ -20,16 +20,16 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         public float StartOffset;
         public float EndOffset;
         public float CastRadius;
-        public CollisionFilter RayLayerMask;
+        public PhysicsCategoryNames RayLayerMask;
 
 
         public int CountTags()
         {
             int i = 0;
+            var tags = DetectableTags.Value;
             for (int t = 0; t < 8; t++)
             {
-                if((DetectableTags.Value >>  t) == 1)
-                    i++;
+                i += (tags & (1 << t)) > 0 ? 1 : 0;
             }
             return i;
         }
@@ -50,7 +50,8 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 {
                     var flag = (inputTags & RayOutputs[i].Material.CustomTags);
                     var pos = (int)Mathf.Log(flag,2);
-                    buffer[highOffset + 8 - pos] = 1f;
+                    buffer[highOffset + pos - 1] = 1f;
+                    Debug.Log($"TagCount:{numDetectableTags} Tag:{RayOutputs[i].Material.CustomTags} Pos:{pos}");
                 }
                 buffer[highOffset + numDetectableTags] = RayOutputs[i].Entity != Entity.Null ? 0f : 1f;
                 buffer[highOffset + numDetectableTags + 1] = RayOutputs[i].Fraction;
@@ -66,11 +67,21 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         RayPerceptionInput m_RayPerceptionInput;
         RayPerceptionOutput m_RayPerceptionOutput;
 
+        public RayPerceptionInput RayPerceptionInput => m_RayPerceptionInput;
+        public RayPerceptionOutput RayPerceptionOutput => m_RayPerceptionOutput;
+
+        public void Dispose()
+        {
+            if (m_RayPerceptionOutput.RayOutputs.IsCreated)
+                m_RayPerceptionOutput.RayOutputs.Dispose();
+        }
+
         public RayPerceptionSensorDOTS(string name, RayPerceptionInput rayPerceptionInput)
         {
             m_Name = name;
             m_RayPerceptionInput = rayPerceptionInput;
             m_RayPerceptionOutput = new RayPerceptionOutput();
+            m_RayPerceptionOutput.RayOutputs = new NativeArray<RaycastHit>(m_RayPerceptionInput.Angles.Count, Allocator.Persistent);
             SetNumObservations(rayPerceptionInput.OutputSize());
         }
 
@@ -91,6 +102,11 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 // Changing the shape will probably break things downstream, but we can at least
                 // keep this consistent.
                 SetNumObservations(rayPerceptionInput.OutputSize());
+                if (m_RayPerceptionOutput.RayOutputs.IsCreated)
+                {
+                    m_RayPerceptionOutput.RayOutputs.Dispose();
+                    m_RayPerceptionOutput.RayOutputs = new NativeArray<RaycastHit>(rayPerceptionInput.Angles.Count, Allocator.Persistent);
+                }
             }
             m_RayPerceptionInput = rayPerceptionInput;
         }
@@ -111,6 +127,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 if(m_RayPerceptionOutput.RayOutputs.IsCreated)
                     m_RayPerceptionOutput.ToFloatArray(numDetectableTags,numRays,m_Observations,m_RayPerceptionInput.DetectableTags.Value);
             }
+            Debug.Log($"RayPerceptionOutput:{m_RayPerceptionOutput.RayOutputs.Length}");
 
             // Finally, add the observations to the ObservationWriter
             writer.AddList(m_Observations);
@@ -124,6 +141,13 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
         public void Update()
         {
+            var numRays = m_RayPerceptionInput.Angles.Count;
+            if (!m_RayPerceptionOutput.RayOutputs.IsCreated || m_RayPerceptionOutput.RayOutputs.Length != numRays)
+            {
+                if (m_RayPerceptionOutput.RayOutputs.IsCreated)
+                    m_RayPerceptionOutput.RayOutputs.Dispose();
+                m_RayPerceptionOutput.RayOutputs = new NativeArray<RaycastHit>(numRays, Allocator.Persistent);
+            }
         }
 
         public void Reset()

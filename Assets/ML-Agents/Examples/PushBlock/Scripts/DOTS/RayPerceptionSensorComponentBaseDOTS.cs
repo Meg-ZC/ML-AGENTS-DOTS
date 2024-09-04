@@ -7,10 +7,14 @@ using UnityEngine.Serialization;
 
 namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 {
-    public class RayPerceptionSensorDOTSComponentBaseDOTS : SensorComponent
+    public abstract class RayPerceptionSensorDOTSComponentBaseDOTS : SensorComponent
     {
-        [HideInInspector, SerializeField, FormerlySerializedAs("sensorName")]
+        [SerializeField, FormerlySerializedAs("sensorName")]
         string m_SensorName = "RayPerceptionSensorDOTSDOTS";
+
+        private bool m_Init = false;
+
+        public bool IsInit => m_Init;
 
         public string SensorName
         {
@@ -27,7 +31,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             get => m_DetectableTags;
             set => m_DetectableTags = value;
         }
-        [HideInInspector, SerializeField, FormerlySerializedAs("raysPerDirection")]
+        [SerializeField, FormerlySerializedAs("raysPerDirection")]
         [Range(0, 50)]
         [Tooltip("Number of rays to the left and right of center.")]
         int m_RaysPerDirection = 3;
@@ -39,7 +43,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             set { m_RaysPerDirection = value; }
         }
 
-        [HideInInspector, SerializeField, FormerlySerializedAs("maxRayDegrees")]
+        [SerializeField, FormerlySerializedAs("maxRayDegrees")]
         [Range(0, 180)]
         [Tooltip("Cone size for rays. Using 90 degrees will cast rays to the left and right. " +
                  "Greater than 90 degrees will go backwards.")]
@@ -51,7 +55,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             set { m_MaxRayDegrees = value; UpdateSensor(); }
         }
 
-        [HideInInspector, SerializeField, FormerlySerializedAs("sphereCastRadius")]
+        [SerializeField, FormerlySerializedAs("sphereCastRadius")]
         [Range(0f, 10f)]
         [Tooltip("Radius of sphere to cast. Set to zero for raycasts.")]
         float m_SphereCastRadius = 0.5f;
@@ -61,7 +65,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             get => m_SphereCastRadius;
             set { m_SphereCastRadius = value; UpdateSensor(); }
         }
-        [HideInInspector, SerializeField, FormerlySerializedAs("rayLength")]
+        [SerializeField, FormerlySerializedAs("rayLength")]
         [Range(1, 1000)]
         [Tooltip("Length of the rays to cast.")]
         float m_RayLength = 20f;
@@ -71,21 +75,21 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             get => m_RayLength;
             set { m_RayLength = value; UpdateSensor(); }
         }
-        const int k_PhysicsDefaultLayers = -5;
-        [HideInInspector, SerializeField, FormerlySerializedAs("rayLayerMask")]
+
+        [SerializeField, FormerlySerializedAs("rayLayerMask")]
         [Tooltip("Controls which layers the rays can hit.")]
-        CollisionFilter m_RayLayerMask;
+        private PhysicsCategoryNames m_RayLayerMask;
 
         /// <summary>
         /// Controls which layers the rays can hit.
         /// </summary>
-        public CollisionFilter RayLayerMask
+        public PhysicsCategoryNames RayLayerMask
         {
             get => m_RayLayerMask;
             set { m_RayLayerMask = value; UpdateSensor(); }
         }
 
-        [HideInInspector, SerializeField, FormerlySerializedAs("observationStacks")]
+        [SerializeField, FormerlySerializedAs("observationStacks")]
         [Range(1, 50)]
         [Tooltip("Number of raycast results that will be stacked before being fed to the neural network.")]
         int m_ObservationStacks = 1;
@@ -97,7 +101,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         }
 
 
-        [HideInInspector, SerializeField]
+        [SerializeField]
         [Tooltip("Disable to provide the rays in left to right order.  Warning: Alternating order will be deprecated, disable it to ensure compatibility with future versions of ML-Agents.")]
         public bool m_AlternatingRayOrder = true;
 
@@ -106,43 +110,15 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             get { return m_AlternatingRayOrder; }
             set { m_AlternatingRayOrder = value; }
         }
-        [HideInInspector]
-        [SerializeField]
-        [Header("Debug Gizmos", order = 999)]
-        internal Color rayHitColor = Color.red;
-
-        /// <summary>
-        /// Color to code a ray that avoid or misses all other objects.
-        /// </summary>
-        [HideInInspector]
-        [SerializeField]
-        internal Color rayMissColor = Color.white;
 
         [NonSerialized]
         RayPerceptionSensorDOTS m_RaySensor;
-        public RayPerceptionSensorDOTS RaySensor
-        {
-            get => m_RaySensor;
-        }
+        public RayPerceptionSensorDOTS RaySensor => m_RaySensor;
 
-        public RayPerceptionCastType GetCastType()
-        {
-            return RayPerceptionCastType.Cast3D;
-        }
-
-        /// <summary>
-        /// Returns the amount that the ray end is offset up or down by.
-        /// </summary>
-        /// <returns></returns>
         public virtual float GetEndVerticalOffset()
         {
             return 0f;
         }
-
-        /// <summary>
-        /// Returns the amount that the ray start is offset up or down by.
-        /// </summary>
-        /// <returns></returns>
         public virtual float GetStartVerticalOffset()
         {
             return 0f;
@@ -151,6 +127,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         public override ISensor[] CreateSensors()
         {
             var rayPerceptionInput = GetRayPerceptionInput();
+            m_Init = true;
 
             m_RaySensor = new RayPerceptionSensorDOTS(m_SensorName, rayPerceptionInput);
 
@@ -215,6 +192,11 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 var rayInput = GetRayPerceptionInput();
                 m_RaySensor.SetRayPerceptionInput(rayInput);
             }
+        }
+
+        private void OnDestroy()
+        {
+            m_RaySensor.Dispose();
         }
     }
 }
