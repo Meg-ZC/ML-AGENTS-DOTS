@@ -385,8 +385,10 @@ GameObject:
   - component: {fileID: 1176118988}
   - component: {fileID: 1176118990}
   - component: {fileID: 1176118989}
+  - component: {fileID: 1176118991}
+  - component: {fileID: 1176118992}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: agent
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -420,7 +422,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 0
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -461,7 +463,7 @@ MonoBehaviour:
     Tag06: 0
     Tag07: 0
   m_RaysPerDirection: 3
-  m_MaxRayDegrees: 90
+  m_MaxRayDegrees: 70
   m_SphereCastRadius: 0.5
   m_RayLength: 20
   m_RayLayerMask: {fileID: 11400000, guid: 291f0781e9af83d44925b5a4c5742211, type: 2}
@@ -484,13 +486,41 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 100
   respawnSignal: 0
   actionSignal: 0
   action2DOTS:
     x: 0
     y: 0
     z: 0
+--- !u!114 &1176118991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176118983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DecisionPeriod: 5
+  DecisionStep: 0
+  TakeActionsBetweenDecisions: 1
+--- !u!114 &1176118992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176118983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a6da8f78a394c6ab027688eab81e04d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugCommandLineOverride: 
 --- !u!1 &1599283715
 GameObject:
   m_ObjectHideFlags: 0

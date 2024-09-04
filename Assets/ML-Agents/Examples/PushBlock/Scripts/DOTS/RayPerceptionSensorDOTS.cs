@@ -51,7 +51,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     var flag = (inputTags & RayOutputs[i].Material.CustomTags);
                     var pos = (int)Mathf.Log(flag,2);
                     buffer[highOffset + pos - 1] = 1f;
-                    Debug.Log($"TagCount:{numDetectableTags} Tag:{RayOutputs[i].Material.CustomTags} Pos:{pos}");
                 }
                 buffer[highOffset + numDetectableTags] = RayOutputs[i].Entity != Entity.Null ? 0f : 1f;
                 buffer[highOffset + numDetectableTags + 1] = RayOutputs[i].Fraction;
@@ -99,8 +98,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     "Changing the number of tags or rays at runtime is not " +
                     "supported and may cause errors in training or inference."
                 );
-                // Changing the shape will probably break things downstream, but we can at least
-                // keep this consistent.
                 SetNumObservations(rayPerceptionInput.OutputSize());
                 if (m_RayPerceptionOutput.RayOutputs.IsCreated)
                 {
@@ -127,9 +124,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 if(m_RayPerceptionOutput.RayOutputs.IsCreated)
                     m_RayPerceptionOutput.ToFloatArray(numDetectableTags,numRays,m_Observations,m_RayPerceptionInput.DetectableTags.Value);
             }
-            Debug.Log($"RayPerceptionOutput:{m_RayPerceptionOutput.RayOutputs.Length}");
-
-            // Finally, add the observations to the ObservationWriter
             writer.AddList(m_Observations);
             return m_Observations.Length;
         }

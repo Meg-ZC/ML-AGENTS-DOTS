@@ -14,4 +14,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
     {
 
     }
+
+    public struct BlockGoalCollisionSignal : IComponentData
+    {
+
+    }
 }

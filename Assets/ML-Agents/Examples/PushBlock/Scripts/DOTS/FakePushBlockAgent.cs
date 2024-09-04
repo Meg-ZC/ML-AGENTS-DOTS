@@ -44,6 +44,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
             // By marking an agent as done AgentReset() will be called automatically.
             EndEpisode();
+            Debug.Log("got goal");
         }
 
         /// <summary>
@@ -72,6 +73,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     break;
                 case 6:
                     action2DOTS = new float3(0.75f, 0, 0);
+                    break;
+                default:
+                    action2DOTS = float3.zero;
                     break;
             }
         }
