@@ -19,7 +19,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         private EnvironmentParameters m_ResetParams;
 
         public bool respawnSignal;
-        public bool actionSignal;
         public float3 action2DOTS;
 
         protected override void Awake()

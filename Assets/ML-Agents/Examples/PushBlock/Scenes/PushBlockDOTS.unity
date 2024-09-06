@@ -486,9 +486,8 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 100
   respawnSignal: 0
-  actionSignal: 0
   action2DOTS:
     x: 0
     y: 0
@@ -729,9 +728,8 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 100
   respawnSignal: 0
-  actionSignal: 0
   action2DOTS:
     x: 0
     y: 0
@@ -907,9 +905,8 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 100
   respawnSignal: 0
-  actionSignal: 0
   action2DOTS:
     x: 0
     y: 0

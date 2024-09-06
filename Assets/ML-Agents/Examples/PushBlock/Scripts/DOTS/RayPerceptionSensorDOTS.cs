@@ -48,7 +48,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 {
                     var flag = (inputTags & RayOutputs[i].Material.CustomTags);
                     var pos = (int)Mathf.Log(flag,2);
-                    Debug.Log(pos);
                     buffer[highOffset + pos - 1] = 1f;
                 }
                 buffer[highOffset + numDetectableTags] = RayOutputs[i].Entity != Entity.Null ? 0f : 1f;
