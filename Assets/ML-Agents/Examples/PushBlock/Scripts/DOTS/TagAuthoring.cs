@@ -12,6 +12,8 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             Goal
         }
 
+        public GameObject block;
+
         public TagType tagType;
         private class TagAuthoringBaker : Baker<TagAuthoring>
         {
@@ -21,7 +23,10 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 switch (authoring.tagType)
                 {
                     case TagType.Agent:
-                        AddComponent<PushBlockAgentTagsComponent>(e);
+                        AddComponent(e,new PushBlockAgentTagsComponent()
+                        {
+                            Block = authoring.block != null ? GetEntity(authoring.block, TransformUsageFlags.Dynamic) : Entity.Null
+                        });
                         break;
                     case TagType.Block:
                         AddComponent<PushBlockBlockTagsComponent>(e);

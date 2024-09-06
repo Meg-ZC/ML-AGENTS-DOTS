@@ -4,7 +4,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 {
     public struct PushBlockAgentTagsComponent : IComponentData
     {
-
+        public Entity Block;
     }
     public struct PushBlockBlockTagsComponent : IComponentData
     {

@@ -8,6 +8,14 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 {
     public class FakePushBlockAgent : Agent
     {
+        public static int AgentNumber
+        {
+            get
+            {
+                var g = GameObject.FindGameObjectsWithTag("agent");
+                return g.Length;
+            }
+        }
         private EnvironmentParameters m_ResetParams;
 
         public bool respawnSignal;
@@ -44,7 +52,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
             // By marking an agent as done AgentReset() will be called automatically.
             EndEpisode();
-            Debug.Log("got goal");
+            GetRandomSpawnPos();
         }
 
         /// <summary>
@@ -53,6 +61,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         public void MoveAgent(ActionSegment<int> act)
         {
             var action = act[0];
+            // Debug.Log($"stepnum: {StepCount}");
 
             switch (action)
             {
@@ -88,6 +97,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         {
             // Move the agent using the action.
             MoveAgent(actionBuffers.DiscreteActions);
+            // Debug.Log(actionBuffers.DiscreteActions);
 
             // Penalty given each step to encourage agent to finish task quickly.
             AddReward(-1f / MaxStep);
@@ -120,9 +130,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         /// </summary>
         public override void OnEpisodeBegin()
         {
-            var rotation = Random.Range(0, 4);
-            var rotationAngle = rotation * 90f;
-
+            respawnSignal = true;
         }
 
 

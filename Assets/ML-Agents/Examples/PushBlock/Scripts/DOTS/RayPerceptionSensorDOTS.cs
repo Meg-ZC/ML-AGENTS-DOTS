@@ -125,6 +125,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     m_RayPerceptionOutput.ToFloatArray(numDetectableTags,numRays,m_Observations,m_RayPerceptionInput.DetectableTags.Value);
             }
             writer.AddList(m_Observations);
+
             return m_Observations.Length;
         }
 

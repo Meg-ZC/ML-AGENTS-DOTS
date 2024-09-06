@@ -16,7 +16,7 @@ namespace ML_Agents.Examples.GridWorld.Scripts.GridWorld
 
         public void OnUpdate(ref SystemState state)
         {
-            Academy.Instance.EnvironmentStep();
+            // Academy.Instance.EnvironmentStep();
         }
 
         [BurstCompile]
