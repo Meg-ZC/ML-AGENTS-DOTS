@@ -1,4 +1,5 @@
 using System;
+using Unity.Collections;
 using Unity.MLAgents.Sensors;
 using Unity.Physics;
 using Unity.Physics.Authoring;
@@ -55,16 +56,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             set { m_MaxRayDegrees = value; UpdateSensor(); }
         }
 
-        [SerializeField, FormerlySerializedAs("sphereCastRadius")]
-        [Range(0f, 10f)]
-        [Tooltip("Radius of sphere to cast. Set to zero for raycasts.")]
-        float m_SphereCastRadius = 0.5f;
-
-        public float SphereCastRadius
-        {
-            get => m_SphereCastRadius;
-            set { m_SphereCastRadius = value; UpdateSensor(); }
-        }
         [SerializeField, FormerlySerializedAs("rayLength")]
         [Range(1, 1000)]
         [Tooltip("Length of the rays to cast.")]
@@ -176,11 +167,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             var rayPerceptionInput = new RayPerceptionInput();
             rayPerceptionInput.RayLength = RayLength;
             rayPerceptionInput.DetectableTags = DetectableTags;
-            rayPerceptionInput.Angles = rayAngles;
+            rayPerceptionInput.Angles = new NativeArray<float>(rayAngles, Allocator.Persistent);
             rayPerceptionInput.StartOffset = GetStartVerticalOffset();
             rayPerceptionInput.EndOffset = GetEndVerticalOffset();
-            rayPerceptionInput.CastRadius = SphereCastRadius;
-            rayPerceptionInput.RayLayerMask = m_RayLayerMask;
 
             return rayPerceptionInput;
         }

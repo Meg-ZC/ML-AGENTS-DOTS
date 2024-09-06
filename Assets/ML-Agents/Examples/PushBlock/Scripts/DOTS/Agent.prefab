@@ -671,6 +671,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   block: {fileID: 0}
   tagType: 0
+  transformUsageFlags: 2
 --- !u!1 &8634250330353872956
 GameObject:
   m_ObjectHideFlags: 0

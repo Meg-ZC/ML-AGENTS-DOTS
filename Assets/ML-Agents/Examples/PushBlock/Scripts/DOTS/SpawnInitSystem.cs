@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using RaycastHit = Unity.Physics.RaycastHit;
 
 namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 {
@@ -21,7 +22,8 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
         {
             state.Enabled = false;
 
-            var g = GameObject.FindGameObjectsWithTag("agent").Length;
+            var agents = GameObject.FindGameObjectsWithTag("agent");
+            var g = agents.Length;
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var config = SystemAPI.GetSingleton<PushBlockConfigComponent>();
 
@@ -31,7 +33,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
             for (int i = 0; i < g; i++)
             {
-                float3 offset = new float3(24 * i, 0, 0);
+                float3 offset = new float3(25 * i, 0, 0);
                 var agent = ecb.Instantiate(config.Agent);
                 var block = ecb.Instantiate(config.Block);
                 var area = ecb.Instantiate(config.Area);
@@ -47,16 +49,24 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
                 var areaTransform = baseTransformOfArea;
                 areaTransform.Position += offset;
+
+                var components = agents[i].GetComponents<RayPerceptionSensorComponentDOTS>();
+
+                var inputs = new PushBlockAreaTagsComponent()
+                {
+                    Index = i,
+                    Agent = agent,
+                    Block = block
+                };
+                ecb.SetComponent(area,inputs);
                 ecb.SetComponent(area, areaTransform);
             }
-
             ecb.Playback(state.EntityManager);
         }
 
         [BurstCompile]
         public void OnDestroy(ref SystemState state)
         {
-
         }
     }
 }

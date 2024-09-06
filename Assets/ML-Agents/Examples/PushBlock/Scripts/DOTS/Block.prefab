@@ -296,3 +296,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   block: {fileID: 0}
   tagType: 1
+  transformUsageFlags: 2
