@@ -36,6 +36,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     case TagType.Area:
                         AddComponent<PushBlockAreaTagsComponent>(e);
                         break;
+                    case TagType.Goal:
+                        AddComponent<PushBlockGoalTagsComponent>(e);
+                        break;
                 }
             }
         }

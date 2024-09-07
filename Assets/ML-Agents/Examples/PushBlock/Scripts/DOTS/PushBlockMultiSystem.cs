@@ -1,4 +1,6 @@
+using System.Data.Common;
 using System.Linq;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -39,8 +41,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             var agentsRespawn = agents.Select(g => g.respawnSignal).ToArray();
 
             var angle = raySample[0].GetRayPerceptionInput().Angles;
-            var startOffset = raySample[0].GetRayPerceptionInput().StartOffset;
-            var endOffset = raySample[0].GetRayPerceptionInput().EndOffset;
             var rayLength = raySample[0].GetRayPerceptionInput().RayLength;
             var detectableTags = raySample[0].GetRayPerceptionInput().DetectableTags;
 
@@ -51,10 +51,12 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             var offsetArray = new float2x2(new float2(components[0][0].StartVerticalOffset, components[0][0].EndVerticalOffset),
                 new float2(components[0][1].StartVerticalOffset, components[0][1].EndVerticalOffset));
 
-            var LTLookup = SystemAPI.GetComponentLookup<LocalTransform>();
+            var ltLookup = SystemAPI.GetComponentLookup<LocalTransform>();
+            var respawnNativeArray = new NativeArray<bool>(agentsRespawn, Allocator.TempJob);
+            var actionNativeArray = new NativeArray<float3>(agentsAction, Allocator.TempJob);
             var rayJob = new RayJob()
             {
-                LT = LTLookup,
+                LT = ltLookup,
                 PhysicsWorld = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld,
                 Angles = angle,
                 RayLength = rayLength,
@@ -63,39 +65,64 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 ComponentPerAgent = componentsPerAgent,
                 Offset = offsetArray
             };
-            var respawnNativeArray = new NativeArray<bool>(agentsRespawn, Allocator.TempJob);
-            var ReSpawnJob = new ReSpawnJob()
+            var reSpawnJob = new ReSpawnJob()
             {
                 Config = agentConfig,
                 ECB = ecb,
-                LT = LTLookup,
+                LT = ltLookup,
                 Random = m_Random,
                 RespawnSignal = respawnNativeArray
             };
-            Dependency = ReSpawnJob.Schedule(Dependency);
-            Dependency = rayJob.Schedule(Dependency);
+            var motionJob = new MotionJob()
+            {
+                Motion = actionNativeArray,
+                RespawnSignal = respawnNativeArray,
+                DeltaTime = SystemAPI.Time.fixedDeltaTime
+            };
+            var collisionEventsJob = new CountNumCollisionEvents()
+            {
+                Blocks = SystemAPI.GetComponentLookup<PushBlockBlockTagsComponent>(),
+                CollisionSignal = respawnNativeArray
+            };
+            var reSpawnHandle = reSpawnJob.Schedule(Dependency);
+            var rayHandle = rayJob.Schedule(Dependency);
+            Dependency = collisionEventsJob.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), JobHandle.CombineDependencies(reSpawnHandle, rayHandle));
+            Dependency = motionJob.Schedule(Dependency);
 
 
             Dependency.Complete();
             for (int i = 0; i < agents.Length; i++)
             {
                 agents[i].respawnSignal = respawnNativeArray[i];
+                if (respawnNativeArray[i] == true)
+                {
+                    agents[i].ScoredAGoal();
+                }
+
+                for (int j = 0; j < componentsPerAgent; j++)
+                {
+                    m_Random.NextDouble4();
+                    var temArray = raycastHits.GetSubArray(i * componentsPerAgent * angle.Length + j * angle.Length, angle.Length);
+                    components[i][j].RaySensor.RayPerceptionOutput.RayOutputs.CopyFrom(temArray);
+                }
             }
 
             ecb.Playback(EntityManager);
             respawnNativeArray.Dispose(Dependency);
             raycastHits.Dispose(Dependency);
+            actionNativeArray.Dispose(Dependency);
             ecb.Dispose();
 
         }
 
     }
 
+    [BurstCompile]
     public partial struct RayJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalTransform> LT;
         [ReadOnly] public PhysicsWorld PhysicsWorld;
-        public NativeArray<float> Angles;
+        [ReadOnly]public NativeArray<float> Angles;
         public float RayLength;
         public CustomPhysicsMaterialTags DetectableTags;
 
@@ -125,48 +152,39 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     };
                     var isHit = PhysicsWorld.CastRay(input, out RaycastHit hit);
                     hit.Fraction = isHit ? hit.Fraction : 1f;
-                    RayOutputs[area.ValueRO.Index * Angles.Length * 2 + j * Angles.Length + i] = hit;
-
-                    var tag = hit.Material.CustomTags;
-
-                    Color color = Color.black;
-                    if(tag == 4) color = Color.green;
-                    if(tag == 8) color = Color.red;
-
-                    Debug.DrawRay(input.Start, isHit?(hit.Position - input.Start):(input.End - input.Start),color);
-
+                    RayOutputs[area.ValueRO.Index * Angles.Length * ComponentPerAgent + j * Angles.Length + i] = hit;
                 }
             }
 
         }
     }
-
+    [BurstCompile]
     public partial struct ReSpawnJob : IJobEntity
     {
         [ReadOnly]public ComponentLookup<LocalTransform> LT;
         public EntityCommandBuffer ECB;
-        public PushBlockConfigComponent Config;
+        [ReadOnly]public PushBlockConfigComponent Config;
         public Random Random;
         public NativeArray<bool> RespawnSignal;
-        private void Execute(RefRO<PushBlockAreaTagsComponent> area,in Entity entity)
+        private void Execute(RefRO<PushBlockAreaTagsComponent> area,Entity  entity)
         {
             if(RespawnSignal[area.ValueRO.Index] == false)
             {return;}
 
             RespawnSignal[area.ValueRO.Index] = false;
             NativeList<float3> positions = new NativeList<float3>(2, Allocator.Temp);
-            positions.Add(new float3(Random.NextFloat(-7, 11), 1, Random.NextFloat(-11, 11)));
-            positions.Add(new float3(Random.NextFloat(-7, 11), 1, Random.NextFloat(-11, 11)));
+            positions.Add(new float3(Random.NextFloat(-11, 11), 0.5f, Random.NextFloat(-7, 11)));
+            positions.Add(new float3(Random.NextFloat(-11, 11), 0.5f, Random.NextFloat(-7, 11)));
             while (math.distance(positions[0],positions[1]) < 2)
             {
-                positions[1] = new float3(Random.NextFloat(-7, 11), 1, Random.NextFloat(-11, 11));
+                positions[1] = new float3(Random.NextFloat(-11, 11), 0.5f, Random.NextFloat(-7, 11));
             }
 
             positions[0] += LT[entity].Position;
             positions[1] += LT[entity].Position;
 
-            var AgentLTPre = LT[area.ValueRO.Agent];
-            var BlockLTPre = LT[area.ValueRO.Block];
+            var agentLTPre = LT[area.ValueRO.Agent];
+            var blockLTPre = LT[area.ValueRO.Block];
 
             ECB.DestroyEntity(area.ValueRO.Agent);
             ECB.DestroyEntity(area.ValueRO.Block);
@@ -176,22 +194,77 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
             ECB.SetComponent(entity,new PushBlockAreaTagsComponent()
             {
+                Index = area.ValueRO.Index,
                 Agent = a,
                 Block = b
             });
 
+            ECB.SetComponent(a,new PushBlockAgentTagsComponent()
+            {
+                Index = area.ValueRO.Index,
+                Block = b
+            });
+
+            ECB.SetComponent(b,new PushBlockBlockTagsComponent()
+            {
+                Index = area.ValueRO.Index
+            });
+
             var agentLT = LocalTransform.Identity;
             agentLT.Position = positions[0];
-            agentLT.Rotation = AgentLTPre.Rotation;
+            if(agentLT.Forward().y > 0.5f)
+                agentLT.Rotation = quaternion.identity;
+            agentLT.Rotation = agentLTPre.Rotation;
             ECB.SetComponent(a,agentLT);
 
             var blockLT = LocalTransform.Identity;
             blockLT.Position = positions[1];
-            blockLT.Rotation = BlockLTPre.Rotation;
+            blockLT.Rotation = blockLTPre.Rotation;
             ECB.SetComponent(b,blockLT);
 
         }
     }
+    [BurstCompile]
+    public partial struct MotionJob :IJobEntity
+    {
+        [ReadOnly]public NativeArray<float3> Motion;
+        [ReadOnly]public NativeArray<bool> RespawnSignal;
+        public float DeltaTime;
 
+        private void Execute(RefRW<LocalTransform> LT, RefRW<PhysicsVelocity> PV, RefRO<PushBlockAgentTagsComponent> agent)
+        {
+            if(RespawnSignal[agent.ValueRO.Index])
+            {
+                return;
+            }
+            var action = Motion[agent.ValueRO.Index];
+            var dir = LT.ValueRO.Forward() * action.z * 7f + LT.ValueRO.Right() * action.x * 7f * 0.75f;
+            var temPV = PV.ValueRO;
+            temPV.Linear *= new float3(0,1,0);
+            temPV.Linear += dir;
 
+            PV.ValueRW = temPV;
+
+            LT.ValueRW = LT.ValueRO.RotateY(DeltaTime * Mathf.Deg2Rad * 200f * action.y);
+        }
+    }
+    [BurstCompile]
+    public partial struct CountNumCollisionEvents : ICollisionEventsJob
+    {
+        [ReadOnly]public ComponentLookup<PushBlockBlockTagsComponent> Blocks;
+        public NativeArray<bool> CollisionSignal;
+        public void Execute(CollisionEvent collisionEvent)
+        {
+            var a = collisionEvent.EntityA;
+            var b = collisionEvent.EntityB;
+
+            if (Blocks.HasComponent(b)
+                ||  Blocks.HasComponent(a))
+            {
+                var block = Blocks.HasComponent(a)?a:b;
+                CollisionSignal[Blocks[block].Index] = true;
+                Debug.Log($"{Blocks[block].Index}");
+            }
+        }
+    }
 }

@@ -153,23 +153,4 @@
  //         }
  //     }
  //
- //     [BurstCompile]
- //     public partial struct CountNumCollisionEvents : ICollisionEventsJob
- //     {
- //         public EntityCommandBuffer ECB;
- //         [ReadOnly]public ComponentLookup<PushBlockBlockTagsComponent> Blocks;
- //         [ReadOnly]public ComponentLookup<PushBlockGoalTagsComponent> Goals;
- //         public void Execute(CollisionEvent collisionEvent)
- //         {
- //             var a = collisionEvent.EntityA;
- //             var b = collisionEvent.EntityB;
- //
- //             if ((Goals.HasComponent(a) && Blocks.HasComponent(b))
- //                 || (Goals.HasComponent(b) && Blocks.HasComponent(a)))
- //             {
- //                 var e = ECB.CreateEntity();
- //                 ECB.AddComponent<BlockGoalCollisionSignal>(e);
- //             }
- //         }
- //     }
  // }

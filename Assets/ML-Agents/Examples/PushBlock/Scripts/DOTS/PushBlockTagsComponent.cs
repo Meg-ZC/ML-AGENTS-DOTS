@@ -6,7 +6,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 {
     public struct PushBlockAreaTagsComponent : IComponentData
     {
-        public bool ReSpawn;
         public int Index;
         public Entity Agent;
         public Entity Block;
@@ -14,10 +13,11 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
     public struct PushBlockAgentTagsComponent : IComponentData
     {
         public Entity Block;
+        public int Index;
     }
     public struct PushBlockBlockTagsComponent : IComponentData
     {
-
+        public int Index;
     }
     public struct PushBlockGoalTagsComponent : IComponentData
     {
