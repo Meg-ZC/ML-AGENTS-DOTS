@@ -1,4 +1,3 @@
-using System.Data.Common;
 using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
@@ -153,6 +152,14 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                     var isHit = PhysicsWorld.CastRay(input, out RaycastHit hit);
                     hit.Fraction = isHit ? hit.Fraction : 1f;
                     RayOutputs[area.ValueRO.Index * Angles.Length * ComponentPerAgent + j * Angles.Length + i] = hit;
+
+                    // var tag = hit.Material.CustomTags;
+                    //
+                    // Color color = Color.black;
+                    // if(tag == 4) color = Color.green;
+                    // if(tag == 8) color = Color.red;
+                    //
+                    // Debug.DrawRay(input.Start, isHit?(hit.Position - input.Start):(input.End - input.Start),color);
                 }
             }
 
@@ -201,8 +208,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
             ECB.SetComponent(a,new PushBlockAgentTagsComponent()
             {
-                Index = area.ValueRO.Index,
-                Block = b
+                Index = area.ValueRO.Index
             });
 
             ECB.SetComponent(b,new PushBlockBlockTagsComponent()
@@ -263,7 +269,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             {
                 var block = Blocks.HasComponent(a)?a:b;
                 CollisionSignal[Blocks[block].Index] = true;
-                Debug.Log($"{Blocks[block].Index}");
             }
         }
     }

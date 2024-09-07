@@ -41,7 +41,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 var agentTransform = baseTransformOfAgent;
                 agentTransform.Position += offset;
                 ecb.SetComponent(agent, agentTransform);
-                ecb.SetComponent(agent, new PushBlockAgentTagsComponent { Block = block ,Index = i});
+                ecb.SetComponent(agent, new PushBlockAgentTagsComponent { Index = i});
 
                 var blockTransform = baseTransformOfBlock;
                 blockTransform.Position += offset;

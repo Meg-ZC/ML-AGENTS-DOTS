@@ -39,7 +39,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             return StartVerticalOffset;
         }
 
-        /// <inheritdoc/>
         public override float GetEndVerticalOffset()
         {
             return EndVerticalOffset;

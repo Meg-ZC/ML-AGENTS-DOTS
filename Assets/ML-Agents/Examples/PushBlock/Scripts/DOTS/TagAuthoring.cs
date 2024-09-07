@@ -25,10 +25,7 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
                 switch (authoring.tagType)
                 {
                     case TagType.Agent:
-                        AddComponent(e,new PushBlockAgentTagsComponent()
-                        {
-                            Block = authoring.block != null ? GetEntity(authoring.block, TransformUsageFlags.Dynamic) : Entity.Null
-                        });
+                        AddComponent(e,new PushBlockAgentTagsComponent());
                         break;
                     case TagType.Block:
                         AddComponent<PushBlockBlockTagsComponent>(e);

@@ -33,34 +33,22 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
 
         }
 
-        /// <summary>
-        /// Use the ground's bounds to pick a random spawn position.
-        /// </summary>
         public void GetRandomSpawnPos()
         {
             respawnSignal = true;
         }
 
-        /// <summary>
-        /// Called when the agent moves the block into the goal.
-        /// </summary>
         public void ScoredAGoal()
         {
-            // We use a reward of 5.
             AddReward(5f);
 
-            // By marking an agent as done AgentReset() will be called automatically.
             EndEpisode();
             GetRandomSpawnPos();
         }
 
-        /// <summary>
-        /// Moves the agent according to the selected action.
-        /// </summary>
         public void MoveAgent(ActionSegment<int> act)
         {
             var action = act[0];
-            // Debug.Log($"stepnum: {StepCount}");
 
             switch (action)
             {
@@ -88,17 +76,11 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             }
         }
 
-        /// <summary>
-        /// Called every step of the engine. Here the agent takes an action.
-        /// </summary>
         public override void OnActionReceived(ActionBuffers actionBuffers)
 
         {
-            // Move the agent using the action.
             MoveAgent(actionBuffers.DiscreteActions);
-            // Debug.Log(actionBuffers.DiscreteActions);
 
-            // Penalty given each step to encourage agent to finish task quickly.
             AddReward(-1f / MaxStep);
         }
 
@@ -123,15 +105,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
             }
         }
 
-        /// <summary>
-        /// In the editor, if "Reset On Done" is checked then AgentReset() will be
-        /// called automatically anytime we mark done = true in an agent script.
-        /// </summary>
         public override void OnEpisodeBegin()
         {
             respawnSignal = true;
         }
-
-
     }
 }

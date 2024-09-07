@@ -12,7 +12,6 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
     }
     public struct PushBlockAgentTagsComponent : IComponentData
     {
-        public Entity Block;
         public int Index;
     }
     public struct PushBlockBlockTagsComponent : IComponentData
@@ -21,11 +20,9 @@ namespace ML_Agents.Examples.PushBlock.Scripts.DOTS
     }
     public struct PushBlockGoalTagsComponent : IComponentData
     {
-
     }
 
     public struct BlockGoalCollisionSignal : IComponentData
     {
-
     }
 }

@@ -434,7 +434,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: c2d63af3a8e7e844aa30ad39e958b5ae, type: 3}
   m_InferenceDevice: 2
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: PushBlock
   TeamId: 0
   m_UseChildSensors: 1
